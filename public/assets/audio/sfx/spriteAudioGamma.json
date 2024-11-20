@@ -1,0 +1,34 @@
+{
+    "spritemap": {
+        "playerhurt000": {
+            "start": 0,
+            "end": 0.432,
+            "loop": false
+        },
+        "playerhurt001": {
+            "start": 0.432,
+            "end": 0.873,
+            "loop": false
+        },
+        "playerhurt002": {
+            "start": 0.873,
+            "end": 1.257,
+            "loop": false
+        },
+        "playerhurt003": {
+            "start": 1.257,
+            "end": 1.698,
+            "loop": false
+        },
+        "playerhurt004": {
+            "start": 1.698,
+            "end": 2.088,
+            "loop": false
+        },
+        "playerhurt005": {
+            "start": 2.088,
+            "end": 2.664,
+            "loop": false
+        }
+    }
+}

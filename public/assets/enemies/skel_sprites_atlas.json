@@ -1,0 +1,658 @@
+{
+    "frames": [
+        {
+            "filename": "skel_base_death000",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 1,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_death001",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 1,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_death002",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 98,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_death003",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 98,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_death004",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 1,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_death005",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 98,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_death006",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 195,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_death007",
+            "frame": {
+                "w": 96,
+                "h": 64,
+                "x": 195,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 195,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 131,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 196,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_base_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_death000",
+            "frame": {
+                "w": 64,
+                "h": 48,
+                "x": 66,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_death001",
+            "frame": {
+                "w": 64,
+                "h": 48,
+                "x": 131,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_death002",
+            "frame": {
+                "w": 64,
+                "h": 48,
+                "x": 196,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_death003",
+            "frame": {
+                "w": 64,
+                "h": 48,
+                "x": 292,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_death004",
+            "frame": {
+                "w": 64,
+                "h": 48,
+                "x": 292,
+                "y": 50
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_death005",
+            "frame": {
+                "w": 64,
+                "h": 48,
+                "x": 292,
+                "y": 99
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_death000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 148
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_death001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 213
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_death002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_death003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 310
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_death004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 131,
+                "y": 310
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_death005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 196,
+                "y": 310
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 278
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 357,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 357,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 357,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_mage_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_death000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_death001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 343
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_death002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_death003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_death004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 375
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_death005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 131,
+                "y": 375
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 196,
+                "y": 375
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 422,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 422,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 422,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_rouge_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 408
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 456
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 456
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "skel_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 456
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}

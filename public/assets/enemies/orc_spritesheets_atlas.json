@@ -1,0 +1,684 @@
+{
+    "frames": [
+        {
+            "filename": "orc_warrior_death000",
+            "frame": {
+                "w": 96,
+                "h": 80,
+                "x": 1,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_death001",
+            "frame": {
+                "w": 96,
+                "h": 80,
+                "x": 1,
+                "y": 82
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_death002",
+            "frame": {
+                "w": 96,
+                "h": 80,
+                "x": 98,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_death003",
+            "frame": {
+                "w": 96,
+                "h": 80,
+                "x": 98,
+                "y": 82
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_death004",
+            "frame": {
+                "w": 96,
+                "h": 80,
+                "x": 1,
+                "y": 163
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_death005",
+            "frame": {
+                "w": 96,
+                "h": 80,
+                "x": 98,
+                "y": 163
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_death000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 195,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_death001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 195,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_death002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 195,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_death003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 195,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_death004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 244
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_death005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 244
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 260,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 260,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+               "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 260,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 260,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 309
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 309
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_death000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 131,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_death001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 196,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_death002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 325,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_death003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 325,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_death004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 325,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_death005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 325,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 374
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 374
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 131,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 196,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_rouge_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run0001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 390,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run0011",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 390,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_run0021",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 390,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_death000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 390,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_death001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_death002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_death003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 439
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_death004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 439
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_death005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 131,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_death006",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 196,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 261,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 326,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 455,
+                "y": 1
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 455,
+                "y": 66
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 455,
+                "y": 131
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_shaman_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 455,
+                "y": 196
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_run000",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 261
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_run001",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 326
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_run002",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 391,
+                "y": 391
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_run003",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 1,
+                "y": 504
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_run004",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 66,
+                "y": 504
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        },
+        {
+            "filename": "orc_warrior_run005",
+            "frame": {
+                "w": 64,
+                "h": 64,
+                "x": 131,
+                "y": 456
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.8
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}
