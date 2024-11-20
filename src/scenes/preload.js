@@ -89,8 +89,8 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image('tiles', '/assets/tiles.png');
         this.load.image('props', '/assets/props.png');
         this.load.tilemapTiledJSON('tiles', '/assets/tiles.tmj');
-        this.load.audio('bgMusic', ['public/assets/audio/Goblins_Dance_(Battle).ogg', 'public/assets/audio/Goblins_Dance_(Battle).mp3']);
-        this.load.audio('playerDeathAudio', ['public/assets/audio/sfx/Female painscream sound Effects.ogg', 'public/assets/audio/sfx/Female painscream sound Effects.mp3']);
-        this.load.audioSprite('playersfx', 'public/assets/audio/sfx/spriteAudioGamma.json', ['public/assets/audio/sfx/spriteAudioGamma.mp3', 'public/assets/audio/sfx/spriteAudioGamma.ogg']);
+        this.load.audio('bgMusic', ['/assets/audio/Goblins_Dance_(Battle).ogg', '/assets/audio/Goblins_Dance_(Battle).mp3']);
+        this.load.audio('playerDeathAudio', ['/assets/audio/sfx/Female painscream sound Effects.ogg', '/assets/audio/sfx/Female painscream sound Effects.mp3']);
+        this.load.audioSprite('playersfx', '/assets/audio/sfx/spriteAudioGamma.json', ['/assets/audio/sfx/spriteAudioGamma.mp3', '/assets/audio/sfx/spriteAudioGamma.ogg']);
     }
 }

@@ -12,7 +12,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
 
     setupPlayerStats() {
         this.speed = 3;
-        this.maxHealth = 10;
+        this.maxHealth = 50;
         this.currentHealth = this.maxHealth;
         this.xp = 0;
         this.level = 1;

@@ -8,8 +8,8 @@
   }
 @font-face {
 	font-family: 'CustomPixelFont';
-	src: url('public/fonts/dogicapixel.ttf') format('truetype'),
-		 url('public/fonts/dogicapixel.otf') format('opentype');
+	src: url('/fonts/dogicapixel.ttf') format('truetype'),
+		 url('/fonts/dogicapixel.otf') format('opentype');
 	font-weight: normal;
 	font-style: normal;
 	font-display: swap;
