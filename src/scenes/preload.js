@@ -71,10 +71,10 @@ export default class PreloadScene extends Phaser.Scene {
             percentText.destroy();
             assetText.destroy();
 
-            // Create animations
             createAnimations(this);
             createSkeletonAnimations(this);
             createOrcAnimations(this);
+
 
             this.scene.start('MenuScene');
         });

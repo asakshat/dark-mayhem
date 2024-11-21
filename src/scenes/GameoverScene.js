@@ -69,20 +69,26 @@ export default class GameOverScene extends Phaser.Scene {
         });
 
         retryButton.on('pointerup', () => {
-            this.scene.start('MainScene');
+            this.scene.stop('MainScene');
+            this.scene.stop('GameOverScene');
+
+            this.scene.start('MainScene', { isRestart: true });
         });
 
-        // Add keyboard control
         this.input.keyboard.on('keydown-SPACE', () => {
-            this.scene.start('MainScene');
+            this.scene.stop('MainScene');
+            this.scene.stop('GameOverScene');
+            this.scene.start('MainScene', { isRestart: true });
         });
 
-        // Add instructions text
         this.add.text(centerX, centerY + 220, 'Press SPACE or click button to play again', {
             fontSize: '16px',
             fontFamily: 'Arial',
             color: '#888888',
             align: 'center'
         }).setOrigin(0.5);
+    }
+    shutdown() {
+        this.input.keyboard.removeAllListeners();
     }
 }

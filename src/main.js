@@ -51,9 +51,7 @@ const config = {
   },
 };
 
-// Initialize game and React overlay
 const game = new Phaser.Game(config);
 const overlay = new ReactOverlay();
 
-// Export for use in scenes
 export { game, overlay };

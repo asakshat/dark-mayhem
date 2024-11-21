@@ -1,33 +1,58 @@
 import Player from "../sprites/Player";
 import WaveManager from "../WaveManager";
 import UIManager from "../UImanager";
-import SpellManager from "../spells/SpellManager";
+import SpellManager from "../spells/spellUtils/SpellManager";
+import { AutoAttackSystem } from "../spells/spellUtils/system/AutoAttackSystem";
+
 
 export default class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
         this.initializeProperties();
     }
+    init(data) {
+        console.log('Initializing MainScene:', data);
+        this.cleanupPhysics();
+        this.initializeProperties();
+    }
+    cleanupPhysics() {
+        if (this.matter && this.matter.world) {
+            const bodies = this.matter.world.getAllBodies();
+            bodies.forEach(body => {
+                this.matter.world.remove(body);
+            });
+
+            this.matter.world.resetCollisionIDs();
+        }
+    }
+    restartGame() {
+        this.scene.stop('MainScene');
+
+        this.scene.start('MainScene', { isRestart: true });
+    }
 
     initializeProperties() {
-        this.totalEnemiesKilled = 0;
-        this.currentWaveEnemiesKilled = 0;
-        this.isGameOver = false;
+        this.state = {
+            totalEnemiesKilled: 0,
+            currentWaveEnemiesKilled: 0,
+            isGameOver: false,
+            autoAttackEnabled: true
+        };
+
+        this.systems = {};
         this.uiManager = new UIManager();
         this.player = null;
         this.waveManager = null;
-        this.bgMusic = null;
-        this.deathSound = null;
         this.mapDimensions = null;
-        this.autoAttackEnabled = true;
-        this.autoAttackRange = 300;
-        this.lastSpellCast = 0;
-        this.spellCooldown = 1000;
+        this.audio = {
+            bgMusic: null,
+            deathSound: null
+        };
     }
 
+
     create() {
-        this.spellManager = new SpellManager(this);
-        this.initializeProperties();
+        this.setupSystems();
         this.mapDimensions = this.createMap();
         this.createPlayer();
         this.setupAudio();
@@ -36,67 +61,36 @@ export default class MainScene extends Phaser.Scene {
         this.setupEventListeners();
         this.setupPlayerInput();
         this.updateUI();
+
+        console.log('Auto Attack Enabled:', this.state.autoAttackEnabled);
+
+
+    }
+
+
+
+    setupSystems() {
+        this.systems = {
+            spell: new SpellManager(this),
+            autoAttack: new AutoAttackSystem(this, {
+                range: 300,
+                spellType: 'ArcaneBolt'
+            })
+        };
     }
 
     setupAudio() {
-        this.bgMusic = this.sound.add('bgMusic', {
+        this.audio.bgMusic = this.sound.add('bgMusic', {
             loop: true,
             volume: 0.8
         });
 
-        this.deathSound = this.sound.add('playerDeathAudio', {
+        this.audio.deathSound = this.sound.add('playerDeathAudio', {
             loop: false,
             volume: 0.6
         });
 
-        this.bgMusic.play();
-    }
-
-    handleAutoAttack() {
-        if (this.isGameOver || this.player.isDead || this.player.isHurt) return;
-        if (!this.autoAttackEnabled) return;
-
-        const currentTime = this.time.now;
-        if (currentTime - this.lastSpellCast < this.spellCooldown) return;
-
-        const nearestEnemy = this.findNearestEnemy(this.autoAttackRange);
-
-        if (nearestEnemy && nearestEnemy.active) {
-            const spell = this.spellManager.castSpell('ArcaneBolt', this.player.x, this.player.y, nearestEnemy);
-
-            if (spell) {
-                this.lastSpellCast = currentTime;
-                this.player.play('attack', true);
-                this.player.once('animationcomplete', (anim) => {
-                    if (anim.key === 'attack' && !this.player.isDead) {
-                        this.player.play('idle');
-                    }
-                });
-            }
-        }
-    }
-
-    findNearestEnemy(maxRange = 300) {
-        let nearestEnemy = null;
-        let nearestDistance = maxRange;
-
-        this.waveManager.enemyPool.pool.forEach(enemies => {
-            enemies.forEach(enemy => {
-                if (enemy.active) {
-                    const distance = Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y,
-                        enemy.x, enemy.y
-                    );
-
-                    if (distance < nearestDistance) {
-                        nearestDistance = distance;
-                        nearestEnemy = enemy;
-                    }
-                }
-            });
-        });
-
-        return nearestEnemy;
+        this.audio.bgMusic.play();
     }
 
     createMap() {
@@ -105,9 +99,11 @@ export default class MainScene extends Phaser.Scene {
         const tilesTileset = map.addTilesetImage('Tiles', 'tiles', 16, 16, 0, 0);
         const propsTileset = map.addTilesetImage('Props', 'props', 16, 16, 0, 0);
 
-        map.createLayer('ground_tiles', [dungeonTileset, tilesTileset, propsTileset], 0, 0);
-        const base = map.createLayer('base', [dungeonTileset, tilesTileset, propsTileset], 0, 0);
-        map.createLayer('objects', [dungeonTileset, tilesTileset, propsTileset], 0, 0);
+        const tileSets = [dungeonTileset, tilesTileset, propsTileset];
+
+        map.createLayer('ground_tiles', tileSets, 0, 0);
+        const base = map.createLayer('base', tileSets, 0, 0);
+        map.createLayer('objects', tileSets, 0, 0);
 
         base.setCollisionByProperty({ collides: true });
         this.matter.world.convertTilemapLayer(base);
@@ -125,7 +121,9 @@ export default class MainScene extends Phaser.Scene {
 
     createPlayer() {
         if (!this.mapDimensions) return;
-
+        if (this.player) {
+            this.player.destroy();
+        }
         this.player = new Player({
             scene: this,
             x: this.mapDimensions.width / 2,
@@ -151,41 +149,31 @@ export default class MainScene extends Phaser.Scene {
     setupCollisions() {
         this.matter.world.off('collisionstart');
         this.matter.world.on('collisionstart', (event) => {
-            if (this.isGameOver) return;
+            if (this.state.isGameOver) return;
 
             event.pairs.forEach((pair) => {
-                if (this.isPlayerEnemyCollision(pair.bodyA, pair.bodyB)) {
-                    const enemy = this.getEnemyFromCollision(pair.bodyA, pair.bodyB);
-                    if (enemy?.damage !== undefined) {
-                        this.player.takeDamage(enemy.damage);
-                        if (this.player.currentHealth <= 0 && !this.isGameOver) {
-                            this.handlePlayerDeath();
-                        }
-                    }
-                }
-
-                if (this.isSpellEnemyCollision(pair.bodyA, pair.bodyB)) {
-                    const { spell, enemy } = this.getSpellAndEnemyFromCollision(pair.bodyA, pair.bodyB);
-                    if (spell && enemy && enemy.active) {
-                        spell.handleCollision(enemy);
-                    }
-                }
+                this.handleCollision(pair.bodyA, pair.bodyB);
             });
         });
     }
 
-    isSpellEnemyCollision(bodyA, bodyB) {
-        return (bodyA.label === 'spellCollider' && bodyB.label === 'EnemyCollider') ||
-            (bodyB.label === 'spellCollider' && bodyA.label === 'EnemyCollider');
-    }
-
-    getSpellAndEnemyFromCollision(bodyA, bodyB) {
-        if (bodyA.label === 'spellCollider' && bodyB.label === 'EnemyCollider') {
-            return { spell: bodyA.gameObject, enemy: bodyB.gameObject };
-        } else if (bodyB.label === 'spellCollider' && bodyA.label === 'EnemyCollider') {
-            return { spell: bodyB.gameObject, enemy: bodyA.gameObject };
+    handleCollision(bodyA, bodyB) {
+        if (this.isPlayerEnemyCollision(bodyA, bodyB)) {
+            const enemy = this.getEnemyFromCollision(bodyA, bodyB);
+            if (enemy?.damage) {
+                this.player.takeDamage(enemy.damage);
+                if (this.player.currentHealth <= 0 && !this.state.isGameOver) {
+                    this.handlePlayerDeath();
+                }
+            }
         }
-        return { spell: null, enemy: null };
+
+        if (this.isSpellEnemyCollision(bodyA, bodyB)) {
+            const { spell, enemy } = this.getSpellAndEnemyFromCollision(bodyA, bodyB);
+            if (spell && enemy && enemy.active) {
+                spell.handleCollision(enemy);
+            }
+        }
     }
 
     setupEventListeners() {
@@ -193,8 +181,8 @@ export default class MainScene extends Phaser.Scene {
 
         this.events.on('playerDied', this.handlePlayerDeath, this);
         this.events.on('enemyDied', () => {
-            this.totalEnemiesKilled++;
-            this.currentWaveEnemiesKilled++;
+            this.state.totalEnemiesKilled++;
+            this.state.currentWaveEnemiesKilled++;
             this.updateUI();
         });
 
@@ -203,34 +191,34 @@ export default class MainScene extends Phaser.Scene {
 
     setupPlayerInput() {
         this.player.inputKeys = this.input.keyboard.addKeys({
-            up: Phaser.Input.Keyboard.KeyCodes.W,
-            down: Phaser.Input.Keyboard.KeyCodes.S,
-            left: Phaser.Input.Keyboard.KeyCodes.A,
-            right: Phaser.Input.Keyboard.KeyCodes.D,
-            upArrow: Phaser.Input.Keyboard.KeyCodes.UP,
-            downArrow: Phaser.Input.Keyboard.KeyCodes.DOWN,
-            leftArrow: Phaser.Input.Keyboard.KeyCodes.LEFT,
-            rightArrow: Phaser.Input.Keyboard.KeyCodes.RIGHT
+            up: 'W',
+            down: 'S',
+            left: 'A',
+            right: 'D',
+            upArrow: 'UP',
+            downArrow: 'DOWN',
+            leftArrow: 'LEFT',
+            rightArrow: 'RIGHT'
         });
     }
 
     handlePlayerDeath() {
-        if (this.isGameOver) return;
+        if (this.state.isGameOver) return;
 
-        this.isGameOver = true;
+        this.state.isGameOver = true;
         this.stopGameplay();
         this.fadeOutBackgroundMusic();
         this.clearEnemies();
         this.player.setDepth(600);
-        this.deathSound?.play();
+        this.audio.deathSound?.play();
         this.player.play('death', true);
         this.startDeathTransition();
     }
 
     fadeOutBackgroundMusic() {
-        if (this.bgMusic) {
+        if (this.audio.bgMusic) {
             this.tweens.add({
-                targets: this.bgMusic,
+                targets: this.audio.bgMusic,
                 volume: 0,
                 duration: 500
             });
@@ -251,7 +239,7 @@ export default class MainScene extends Phaser.Scene {
             onComplete: () => {
                 this.time.timeScale = 1;
                 this.scene.start('GameOverScene', {
-                    totalKills: this.totalEnemiesKilled,
+                    totalKills: this.state.totalEnemiesKilled,
                     wavesCompleted: this.waveManager.currentWave - 1
                 });
             }
@@ -272,7 +260,7 @@ export default class MainScene extends Phaser.Scene {
         }
 
         this.time.timeScale = 0.2;
-        this.autoAttackEnabled = false;
+        this.state.autoAttackEnabled = false;
     }
 
     clearEnemies(radius = 800) {
@@ -296,15 +284,20 @@ export default class MainScene extends Phaser.Scene {
         });
     }
 
-    update() {
-        if (this.isGameOver) return;
+    update(time) {
+        if (this.state.isGameOver) return;
 
-        this.player.update();
-        this.waveManager.update();
+        this.player?.update();
+        this.waveManager?.update();
         this.updateCamera();
         this.updateUI();
-        this.spellManager.update();
-        this.handleAutoAttack();
+
+        // Update game systems
+        Object.values(this.systems).forEach(system => {
+            if (system.update) {
+                system.update(time);
+            }
+        });
     }
 
     updateCamera() {
@@ -317,8 +310,13 @@ export default class MainScene extends Phaser.Scene {
         this.uiManager.updateUI({
             currentScene: 'MainScene',
             player: this.player,
-            totalEnemiesKilled: this.totalEnemiesKilled
+            totalEnemiesKilled: this.state.totalEnemiesKilled
         });
+    }
+
+    isSpellEnemyCollision(bodyA, bodyB) {
+        return (bodyA.label === 'spellCollider' && bodyB.label === 'EnemyCollider') ||
+            (bodyB.label === 'spellCollider' && bodyA.label === 'EnemyCollider');
     }
 
     isPlayerEnemyCollision(bodyA, bodyB) {
@@ -330,20 +328,64 @@ export default class MainScene extends Phaser.Scene {
         return bodyA.label === 'EnemyCollider' ? bodyA.gameObject : bodyB.gameObject;
     }
 
+    getSpellAndEnemyFromCollision(bodyA, bodyB) {
+        if (bodyA.label === 'spellCollider' && bodyB.label === 'EnemyCollider') {
+            return { spell: bodyA.gameObject, enemy: bodyB.gameObject };
+        }
+        return { spell: bodyB.gameObject, enemy: bodyA.gameObject };
+    }
+
     shutdown() {
-        this.bgMusic?.stop();
-        this.deathSound?.stop();
-        this.uiManager?.destroy();
-        this.events.off('playerDied').off('enemyDied');
+        console.log('Shutting down MainScene');
+
+        // Cleanup physics first
+        this.cleanupPhysics();
+
+        // Stop audio
+        Object.values(this.audio).forEach(sound => {
+            if (sound?.stop) sound.stop();
+        });
+
+        // Cleanup systems
+        Object.values(this.systems).forEach(system => {
+            if (system.shutdown) {
+                system.shutdown();
+            }
+        });
+
+        // Cleanup UI
+        if (this.uiManager?.destroy) {
+            this.uiManager.destroy();
+        }
+
+        // Remove event listeners
+        this.events.off('playerDied');
+        this.events.off('enemyDied');
+        this.events.off('playerHealthChanged');
         this.matter.world.off('collisionstart');
 
+        // Cleanup wave manager
         if (this.waveManager) {
-            this.waveManager.spatialGrid.clear();
-            this.waveManager.enemyPool.pool.forEach(enemies => {
-                enemies.forEach(enemy => {
-                    if (enemy.active) enemy.destroy();
+            this.waveManager.spatialGrid?.clear();
+            if (this.waveManager.enemyPool?.pool) {
+                this.waveManager.enemyPool.pool.forEach(enemies => {
+                    enemies.forEach(enemy => {
+                        if (enemy.active) {
+                            enemy.destroy();
+                        }
+                    });
                 });
-            });
+            }
         }
+
+        // Destroy player if it exists
+        if (this.player) {
+            this.player.destroy();
+        }
+
+        // Null out references
+        this.player = null;
+        this.waveManager = null;
+        this.systems = {};
     }
 }

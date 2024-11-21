@@ -16,22 +16,27 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         this.damage = enemyConfig.damage;
         this.xpValue = enemyConfig.xpValue;
 
+        // AI properties
         this.updateInterval = 100;
         this.lastUpdate = 0;
         this.lastGridKey = null;
+        this.preferredDistance = Phaser.Math.Between(100, 200);
+        this.orbitSpeed = 0.5 + Math.random() * 0.5;
+        this.currentAngle = Math.random() * Math.PI * 2;
+        this.personalSpace = 40;
+        this.lastPositionChange = 0;
+        this.positionChangeInterval = 2000 + Math.random() * 2000;
 
         this.setupPhysics(enemyConfig.colliderRadius);
         this.setupAnimations();
     }
-
     setupPhysics(radius) {
         const { Body, Bodies } = Phaser.Physics.Matter.Matter;
         const enemyCollider = Bodies.circle(this.x, this.y, radius, {
             isSensor: false,
-            label: `EnemyCollider`,
-            friction: 0.001,
-            restitution: 0.2
+            label: 'EnemyCollider'
         });
+
         enemyCollider.gameObject = this;
 
         const compoundBody = Body.create({
@@ -44,7 +49,6 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
             .setBounce(0.2)
             .setMass(1);
     }
-
     setupAnimations() {
         if (!this.anims.isPlaying) {
             this.play(`${this.enemyType}_run`);
@@ -79,29 +83,78 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         }
     }
 
+
     updateAI() {
         if (!this.scene?.player) return;
 
-        const dx = this.scene.player.x - this.x;
-        const dy = this.scene.player.y - this.y;
-        const length = Math.sqrt(dx * dx + dy * dy);
+        const time = this.scene.time.now;
+        const playerPos = { x: this.scene.player.x, y: this.scene.player.y };
 
-        if (length > 10) {
-            let velocityX = (dx / length) * this.speed;
-            let velocityY = (dy / length) * this.speed;
+        // Calculate base position relative to player
+        let targetPos = this.calculateTargetPosition(playerPos, time);
 
-            // Add slight circular motion to make movement more interesting
-            const angle = Math.atan2(dy, dx);
-            const tangentialFactor = 0.3; // Strength of circular motion
+        // Adjust for other enemies
+        targetPos = this.adjustForNearbyEnemies(targetPos);
 
-            // Add tangential velocity component
-            velocityX += Math.cos(angle + Math.PI / 2) * this.speed * tangentialFactor;
-            velocityY += Math.sin(angle + Math.PI / 2) * this.speed * tangentialFactor;
+        // Calculate movement
+        this.moveTowardsPosition(targetPos);
+    }
 
-            // Normalize and apply speed
-            const totalVelocity = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-            velocityX = (velocityX / totalVelocity) * this.speed;
-            velocityY = (velocityY / totalVelocity) * this.speed;
+    calculateTargetPosition(playerPos, time) {
+        // Update orbit angle based on time
+        if (time - this.lastPositionChange > this.positionChangeInterval) {
+            this.currentAngle += (Math.random() - 0.5) * Math.PI / 2;
+            this.lastPositionChange = time;
+        }
+
+        this.currentAngle += this.orbitSpeed * 0.016; // Smooth orbital motion
+
+        // Calculate target position in orbit around player
+        return {
+            x: playerPos.x + Math.cos(this.currentAngle) * this.preferredDistance,
+            y: playerPos.y + Math.sin(this.currentAngle) * this.preferredDistance
+        };
+    }
+
+    adjustForNearbyEnemies(targetPos) {
+        let adjustedX = targetPos.x;
+        let adjustedY = targetPos.y;
+
+        // Get nearby enemies from spatial grid
+        if (this.scene.waveManager?.spatialGrid) {
+            const nearbyEntities = this.scene.waveManager.spatialGrid
+                .getNearbyEntities(this.x, this.y, this.personalSpace * 2);
+
+            nearbyEntities.forEach(entity => {
+                if (entity !== this && entity.active) {
+                    const dx = this.x - entity.x;
+                    const dy = this.y - entity.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < this.personalSpace) {
+                        const pushForce = (this.personalSpace - distance) / this.personalSpace;
+                        adjustedX += (dx / distance) * pushForce * 20;
+                        adjustedY += (dy / distance) * pushForce * 20;
+                    }
+                }
+            });
+        }
+
+        return { x: adjustedX, y: adjustedY };
+    }
+    moveTowardsPosition(targetPos) {
+        const dx = targetPos.x - this.x;
+        const dy = targetPos.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > 5) {
+            const speed = this.speed * (distance > this.preferredDistance ? 1.5 : 1);
+            let velocityX = (dx / distance) * speed;
+            let velocityY = (dy / distance) * speed;
+
+            // Add slight randomization to movement
+            velocityX += (Math.random() - 0.5) * 0.3;
+            velocityY += (Math.random() - 0.5) * 0.3;
 
             this.setVelocity(velocityX, velocityY);
             this.setFlipX(velocityX < 0);
@@ -109,6 +162,8 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
             if (this.visible && (!this.anims.isPlaying || this.anims.currentAnim?.key !== `${this.enemyType}_run`)) {
                 this.play(`${this.enemyType}_run`, true);
             }
+        } else {
+            this.setVelocity(0, 0);
         }
     }
 
@@ -141,3 +196,5 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         }
     }
 }
+
+

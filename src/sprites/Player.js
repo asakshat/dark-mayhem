@@ -11,7 +11,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
     }
 
     setupPlayerStats() {
-        this.speed = 3;
+        this.speed = 4;
         this.maxHealth = 50;
         this.currentHealth = this.maxHealth;
         this.xp = 0;
@@ -52,7 +52,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         });
         const compoundBody = Body.create({
             parts: [playerCollider, playerSensor],
-            frictionAir: 0.35,
+            frictionAir: 0.05,
         });
         this.setExistingBody(compoundBody).setFixedRotation();
     }
