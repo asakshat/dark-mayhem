@@ -73,7 +73,7 @@ export default class MainScene extends Phaser.Scene {
         this.systems = {
             spell: new SpellManager(this),
             autoAttack: new AutoAttackSystem(this, {
-                range: 300,
+                range: 600,
                 spellType: 'ArcaneBolt'
             })
         };

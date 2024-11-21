@@ -2,7 +2,7 @@ export const EnemyTypes = {
     ORC: {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc',
-        speed: 1.8,
+        speed: 1.4,
         health: 50,
         damage: 10,
         xpValue: 20,
@@ -20,7 +20,7 @@ export const EnemyTypes = {
     ORC_SHAMAN: {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc_shaman',
-        speed: 1.5,
+        speed: 1.2,
         health: 60,
         damage: 12,
         xpValue: 25,
@@ -29,7 +29,7 @@ export const EnemyTypes = {
     ORC_ROUGE: {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc_rouge',
-        speed: 2.2,
+        speed: 1.8,
         health: 40,
         damage: 8,
         xpValue: 15,
