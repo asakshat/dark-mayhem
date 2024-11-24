@@ -4,6 +4,7 @@ import { EnemyTypes } from "./sprites/enemyTypes";
 import { DebugVisualizer } from "./CoreFunctions/DebugVisualizer.js";
 import { SpawnPosition } from "./CoreFunctions/SpawnPosition.js";
 import OptimizedEnemy from "./sprites/OptimizedEnemy.js";
+
 export default class WaveManager {
     constructor(scene, config) {
         this.scene = scene;
@@ -13,7 +14,6 @@ export default class WaveManager {
             scene.game.config.height,
             200
         );
-
 
         this.maxConcurrentEnemies = config.initialEnemies;
         this.spawnDelay = config.spawnDelay;
@@ -37,7 +37,7 @@ export default class WaveManager {
             width: width - 64,
             height: height - 64
         };
-        this.spawnPosition = new SpawnPosition(this.mapBounds, this.minSpawnDistance);
+        this.spawnPosition = new SpawnPosition(this.mapBounds, this.scene.player, this.minSpawnDistance);
     }
 
     spawnEnemy() {
@@ -58,18 +58,7 @@ export default class WaveManager {
             this.enemyPool.pool.get(type).push(enemy);
         }
 
-        const safeBounds = this.spawnPosition.getSafeSpawnBounds();
-        const playerRelative = this.spawnPosition.getPlayerRelativePosition(
-            this.scene.player,
-            safeBounds
-        );
-        const avoidance = this.spawnPosition.calculateAvoidanceDirections(playerRelative);
-        const angleRanges = this.spawnPosition.calculateAllowedAngleRanges(avoidance);
-        const spawnPoint = this.spawnPosition.generateSpawnPoint(
-            this.scene.player,
-            angleRanges,
-            safeBounds
-        );
+        const spawnPoint = this.spawnPosition.generateSpawnPoint();
 
         // Reset enemy state
         enemy.isDying = false;
@@ -83,11 +72,11 @@ export default class WaveManager {
 
         this.spatialGrid.insert(enemy);
     }
+
     getRandomEnemyType() {
         const types = Object.keys(EnemyTypes);
         return types[Math.floor(Math.random() * types.length)];
     }
-
 
     update() {
         const currentTime = this.scene.time.now;
@@ -95,13 +84,13 @@ export default class WaveManager {
         this.checkDifficulty(currentTime);
         this.checkSpawns(currentTime);
     }
+
     checkDifficulty(currentTime) {
         if (currentTime - this.lastDifficultyIncrease >= this.difficultyInterval) {
             this.increaseDifficulty();
             this.lastDifficultyIncrease = currentTime;
         }
     }
-
 
     updateEnemies(currentTime) {
         this.enemyPool.pool.forEach(enemies => {
@@ -112,6 +101,7 @@ export default class WaveManager {
             });
         });
     }
+
     checkSpawns(currentTime) {
         if (!this.isActive) return;
 
@@ -122,6 +112,7 @@ export default class WaveManager {
             this.lastSpawnTime = currentTime;
         }
     }
+
     increaseDifficulty() {
         this.difficultyMultiplier += 0.5;
         this.maxConcurrentEnemies = Math.floor(this.maxConcurrentEnemies * 1.5);
@@ -134,6 +125,7 @@ export default class WaveManager {
             spawnDelay: this.spawnDelay
         });
     }
+
     countActiveEnemies() {
         let count = 0;
         this.enemyPool.pool.forEach(enemies => {
@@ -141,30 +133,6 @@ export default class WaveManager {
         });
         return count;
     }
-
-
-    updateWaveState(currentTime) {
-        if (this.waveState.shouldStartNewWave(currentTime)) {
-            this.startWave();
-        } else if (this.waveState.canSpawnEnemy(currentTime)) {
-            this.spawnEnemy();
-        } else if (this.checkWaveComplete()) {
-            this.waveState.completeWave(currentTime);
-            this.spatialGrid.clear();
-        }
-    }
-
-    startWave() {
-        this.waveState.startWave(this.scene.time.now);
-        this.spatialGrid.clear();
-    }
-
-    checkWaveComplete() {
-        let activeEnemies = 0;
-        this.enemyPool.pool.forEach(enemies => {
-            activeEnemies += enemies.filter(e => e.active).length;
-        });
-        return activeEnemies === 0 &&
-            this.waveState.enemiesSpawned >= this.waveState.enemiesInWave;
-    }
 }
+
+

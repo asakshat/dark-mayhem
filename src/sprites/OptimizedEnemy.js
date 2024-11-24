@@ -37,7 +37,7 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         this.minDistance = 30;
         this.orbitSpeed = 0.3 + Math.random() * 0.3;
         this.currentAngle = Math.random() * Math.PI * 2;
-        this.personalSpace = 30;
+        this.personalSpace = 20;
         this.lastPositionChange = 0;
         this.positionChangeInterval = 2000 + Math.random() * 2000;
 
@@ -49,7 +49,8 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         const { Body, Bodies } = Phaser.Physics.Matter.Matter;
         const enemyCollider = Bodies.circle(this.x, this.y, radius, {
             isSensor: false,
-            label: 'EnemyCollider'
+            label: 'EnemyCollider',
+
         });
 
         const CATEGORIES = {
@@ -63,16 +64,20 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
 
         const compoundBody = Body.create({
             parts: [enemyCollider],
-            frictionAir: 0.05
+            frictionAir: 0.05,
+            friction: 0.1,
+            restitution: 0.3
         });
 
         this.setExistingBody(compoundBody)
             .setFixedRotation()
-            .setBounce(0.2)
+            .setBounce(0.3)
             .setMass(1)
             .setCollisionCategory(CATEGORIES.ENEMY)
-            .setCollidesWith(CATEGORIES.PLAYER | CATEGORIES.SPELL | CATEGORIES.WALL);
+            // Important: Add ENEMY to collidesWith to enable enemy-enemy collisions
+            .setCollidesWith(CATEGORIES.PLAYER | CATEGORIES.SPELL | CATEGORIES.WALL | CATEGORIES.ENEMY);
     }
+
 
     setupAnimations() {
         if (!this.anims.isPlaying) {
@@ -188,7 +193,7 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         if (!this.scene.waveManager?.spatialGrid) return targetPos;
 
         const nearbyEntities = this.scene.waveManager.spatialGrid
-            .getNearbyEntities(this.x, this.y, this.personalSpace * 2);
+            .getNearbyEntities(this.x, this.y, this.personalSpace * 3); // Increased detection range
 
         let totalAdjustment = { x: 0, y: 0 };
         let adjustmentCount = 0;
@@ -199,26 +204,28 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
                 const dy = this.y - entity.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                if (distance < this.personalSpace) {
-                    const pushForce = (this.personalSpace - distance) / this.personalSpace;
-                    const adjustmentStrength = Math.min(1, distanceToPlayer / (this.preferredDistance * 0.5));
-                    totalAdjustment.x += (dx / distance) * pushForce * 8 * adjustmentStrength;
-                    totalAdjustment.y += (dy / distance) * pushForce * 8 * adjustmentStrength;
+                if (distance < this.personalSpace * 2) { // Increased avoidance range
+                    // Stronger avoidance force for very close enemies
+                    const pushForce = Math.pow((this.personalSpace * 2 - distance) / (this.personalSpace * 2), 2);
+                    const adjustmentStrength = 1; // Always full strength for collision avoidance
+
+                    totalAdjustment.x += (dx / distance) * pushForce * 12; // Increased force
+                    totalAdjustment.y += (dy / distance) * pushForce * 12;
                     adjustmentCount++;
                 }
             }
         });
 
         if (adjustmentCount > 0) {
+            // Apply stronger adjustment for collision avoidance
             return {
-                x: targetPos.x + totalAdjustment.x / adjustmentCount,
-                y: targetPos.y + totalAdjustment.y / adjustmentCount
+                x: targetPos.x + (totalAdjustment.x / adjustmentCount),
+                y: targetPos.y + (totalAdjustment.y / adjustmentCount)
             };
         }
 
         return targetPos;
     }
-
     moveToPosition(targetPos, distanceToPlayer, behavior) {
         const dx = targetPos.x - this.x;
         const dy = targetPos.y - this.y;
@@ -230,13 +237,12 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         }
 
         let speedMultiplier = {
-            'aggressive': 1.6,  // Increased aggressive speed
+            'aggressive': 1.6,
             'retreat': 1.4,
             'flank': 1.3,
             'orbit': 1.0
         }[behavior] || 1;
 
-        // Extra speed boost when very close to player during aggressive behavior
         if (behavior === 'aggressive' && distanceToPlayer < this.minDistance) {
             speedMultiplier *= 1.3;
         }
@@ -245,10 +251,34 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         let velocityX = (dx / distance) * baseSpeed;
         let velocityY = (dy / distance) * baseSpeed;
 
-        // Reduce randomization for aggressive behavior
-        if (behavior !== 'aggressive') {
-            velocityX += (Math.random() - 0.5) * 0.1 * baseSpeed;
-            velocityY += (Math.random() - 0.5) * 0.1 * baseSpeed;
+        // Get current velocity for smoother transitions
+        const currentVelX = this.body.velocity.x;
+        const currentVelY = this.body.velocity.y;
+
+        // Smoothly interpolate to new velocity
+        velocityX = currentVelX + (velocityX - currentVelX) * 0.2;
+        velocityY = currentVelY + (velocityY - currentVelY) * 0.2;
+
+        // Add slight repulsion when very close to other enemies
+        const nearbyEnemies = this.scene.waveManager?.spatialGrid
+            .getNearbyEntities(this.x, this.y, this.personalSpace);
+
+        if (nearbyEnemies?.size > 0) {
+            let repulsionX = 0;
+            let repulsionY = 0;
+            nearbyEnemies.forEach(enemy => {
+                if (enemy !== this) {
+                    const repulsionDx = this.x - enemy.x;
+                    const repulsionDy = this.y - enemy.y;
+                    const repulsionDist = Math.sqrt(repulsionDx * repulsionDx + repulsionDy * repulsionDy);
+                    if (repulsionDist < this.personalSpace) {
+                        repulsionX += (repulsionDx / repulsionDist) * baseSpeed * 0.5;
+                        repulsionY += (repulsionDy / repulsionDist) * baseSpeed * 0.5;
+                    }
+                }
+            });
+            velocityX += repulsionX;
+            velocityY += repulsionY;
         }
 
         this.setVelocity(velocityX, velocityY);
@@ -258,7 +288,6 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
             this.play(`${this.enemyType}_run`, true);
         }
     }
-
     takeDamage(amount) {
         if (!this.active || this.isDying || this.currentHealth <= 0) return;
         if (this.scene.time.now - this.lastHitTime < this.hitCooldown) return;

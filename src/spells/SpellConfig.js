@@ -7,7 +7,7 @@ export const SpellConfig = {
             colliderRadius: 8,
             startingProjectiles: 2,
             maxProjectiles: 10,
-            cooldown: 500,
+            cooldown: 1000,
         },
         visuals: {
             texture: 'playerChar',
@@ -29,7 +29,7 @@ export const SpellConfig = {
             explodeOnImpact: true,
             piercing: false,
             searchRadius: 300,
-            retargetDelay: 500
+            retargetDelay: 300
         }
     }
 };

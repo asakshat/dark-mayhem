@@ -72,7 +72,7 @@ export default class MainScene extends Phaser.Scene {
         this.systems = {
             spell: new SpellManager(this),
             autoAttack: new AutoAttackSystem(this, {
-                range: 600,
+                range: 400,
                 spellType: 'ArcaneBolt'
             })
         };
@@ -155,8 +155,8 @@ export default class MainScene extends Phaser.Scene {
         if (!this.mapDimensions) return;
 
         this.waveManager = new WaveManager(this, {
-            initialEnemies: 50,
-            enemiesIncreasePerWave: 2,
+            initialEnemies: 100,
+            difficultyInterval: 180000,
             spawnDelay: 200
         });
         this.waveManager.setMapBounds(this.mapDimensions.width, this.mapDimensions.height);
@@ -201,7 +201,7 @@ export default class MainScene extends Phaser.Scene {
         }
     }
     setupEventListeners() {
-        this.events.off('playerDied').off('enemyDied').off('playerHealthChanged');
+        this.events.off('playerDied').off('enemyDied').off('playerHealthChanged').off('playerLeveledUp');
 
         this.events.on('playerDied', this.handlePlayerDeath, this);
         this.events.on('enemyDied', (enemy) => {
@@ -214,8 +214,8 @@ export default class MainScene extends Phaser.Scene {
         });
 
         this.events.on('playerHealthChanged', () => this.updateUI());
+        this.events.on('playerLeveledUp', () => this.updateUI());
     }
-
     setupPlayerInput() {
         this.player.inputKeys = this.input.keyboard.addKeys({
             up: 'W',

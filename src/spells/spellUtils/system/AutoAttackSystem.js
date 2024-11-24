@@ -2,7 +2,7 @@ export class AutoAttackSystem {
     constructor(scene, config = {}) {
         this.scene = scene;
         this.config = {
-            range: config.range || 300,
+            range: config.range || 200,
             spellType: config.spellType || 'ArcaneBolt',
             targetingDelay: 100
         };

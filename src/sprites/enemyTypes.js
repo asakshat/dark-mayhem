@@ -2,7 +2,7 @@ export const EnemyTypes = {
     ORC: {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc',
-        speed: 1.4,
+        speed: 2,
         health: 10,
         damage: 10,
         xpValue: 20,
@@ -11,7 +11,7 @@ export const EnemyTypes = {
     ORC_WARRIOR: {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc_warrior',
-        speed: 1.2,
+        speed: 1.8,
         health: 10,
         damage: 15,
         xpValue: 30,
@@ -20,7 +20,7 @@ export const EnemyTypes = {
     ORC_SHAMAN: {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc_shaman',
-        speed: 1.2,
+        speed: 1.6,
         health: 10,
         damage: 12,
         xpValue: 25,
@@ -39,7 +39,7 @@ export const EnemyTypes = {
     SKEL: {
         spritesheetKey: 'skeleton_base',
         animationPrefix: 'skel_base',
-        speed: 0.9,
+        speed: 1.4,
         health: 45,
         damage: 8,
         xpValue: 18,
@@ -48,7 +48,7 @@ export const EnemyTypes = {
     SKEL_ROUGE: {
         spritesheetKey: 'skeleton_base',
         animationPrefix: 'skel_rouge',
-        speed: 1.3,
+        speed: 1.4,
         health: 35,
         damage: 6,
         xpValue: 12,
@@ -57,7 +57,7 @@ export const EnemyTypes = {
     SKEL_MAGE: {
         spritesheetKey: 'skeleton_base',
         animationPrefix: 'skel_mage',
-        speed: 0.7,
+        speed: 2,
         health: 55,
         damage: 15,
         xpValue: 30,
@@ -66,7 +66,7 @@ export const EnemyTypes = {
     SKEL_BASE: {
         spritesheetKey: 'skeleton_base',
         animationPrefix: 'skel_base',
-        speed: 1,
+        speed: 1.8,
         health: 70,
         damage: 12,
         xpValue: 25,

@@ -15,7 +15,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
     }
 
     setupPlayerStats() {
-        this.speed = 4;
+        this.speed = 2.4;
         this.maxHealth = 50;
         this.currentHealth = this.maxHealth;
         this.xp = 0;
@@ -148,14 +148,14 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
     getXPToNextLevel() {
         return this.level * 100;
     }
+
     levelUp() {
         this.level++;
         this.maxHealth += 10;
-        this.currentHealth = this.maxHealth;
 
-        // Add level up effect
         this.playLevelUpEffect();
     }
+
     playLevelUpEffect() {
         const wasAlreadyTinting = this.isTinting;
         this.isTinting = true;
@@ -177,15 +177,6 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
             }
         });
 
-        // Backup timer in case audio doesn't trigger complete event
-        this.scene.time.delayedCall(2000, () => {
-            if (this.isTinting) {
-                this.clearTint();
-                if (!wasAlreadyTinting) {
-                    this.isTinting = false;
-                }
-            }
-        });
     }
 
     gainXP(amount) {
@@ -193,6 +184,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         while (this.xp >= this.getXPToNextLevel()) {
             this.levelUp();
             this.xp -= this.getXPToNextLevel();
+            this.scene.events.emit('playerLeveledUp', this);
         }
     }
 
