@@ -3,7 +3,7 @@ export const EnemyTypes = {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc',
         speed: 1.4,
-        health: 50,
+        health: 10,
         damage: 10,
         xpValue: 20,
         colliderRadius: 8
@@ -12,7 +12,7 @@ export const EnemyTypes = {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc_warrior',
         speed: 1.2,
-        health: 75,
+        health: 10,
         damage: 15,
         xpValue: 30,
         colliderRadius: 8
@@ -21,7 +21,7 @@ export const EnemyTypes = {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc_shaman',
         speed: 1.2,
-        health: 60,
+        health: 10,
         damage: 12,
         xpValue: 25,
         colliderRadius: 8
@@ -30,7 +30,7 @@ export const EnemyTypes = {
         spritesheetKey: 'orc_base',
         animationPrefix: 'orc_rouge',
         speed: 1.8,
-        health: 40,
+        health: 10,
         damage: 8,
         xpValue: 15,
         colliderRadius: 8

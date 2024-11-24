@@ -62,7 +62,6 @@ export default class MainScene extends Phaser.Scene {
         this.setupPlayerInput();
         this.updateUI();
 
-        console.log('Auto Attack Enabled:', this.state.autoAttackEnabled);
 
 
     }
@@ -105,8 +104,26 @@ export default class MainScene extends Phaser.Scene {
         const base = map.createLayer('base', tileSets, 0, 0);
         map.createLayer('objects', tileSets, 0, 0);
 
+        const CATEGORIES = {
+            PLAYER: 0x0001,
+            SPELL: 0x0002,
+            ENEMY: 0x0004,
+            WALL: 0x0008
+        };
+
+        // Set up collision for the base layer
         base.setCollisionByProperty({ collides: true });
-        this.matter.world.convertTilemapLayer(base);
+
+        // Convert layer to Matter bodies with collision properties
+        const options = {
+            isStatic: true,
+            collisionFilter: {
+                category: CATEGORIES.WALL,
+                mask: CATEGORIES.PLAYER | CATEGORIES.ENEMY
+            }
+        };
+
+        this.matter.world.convertTilemapLayer(base, options);
 
         const dimensions = {
             width: map.widthInPixels,
@@ -138,9 +155,8 @@ export default class MainScene extends Phaser.Scene {
         if (!this.mapDimensions) return;
 
         this.waveManager = new WaveManager(this, {
-            initialEnemies: 200,
+            initialEnemies: 50,
             enemiesIncreasePerWave: 2,
-            timeBetweenWaves: 10000,
             spawnDelay: 200
         });
         this.waveManager.setMapBounds(this.mapDimensions.width, this.mapDimensions.height);
@@ -158,31 +174,42 @@ export default class MainScene extends Phaser.Scene {
     }
 
     handleCollision(bodyA, bodyB) {
+        if (this.isSpellEnemyCollision(bodyA, bodyB)) {
+            const { spell, enemy } = this.getSpellAndEnemyFromCollision(bodyA, bodyB);
+
+
+            //  validation
+            if (spell &&
+                enemy &&
+                spell.active &&
+                enemy.active &&
+                !enemy.isDying &&
+                enemy.currentHealth > 0) {
+
+                spell.handleCollision(enemy);
+            }
+        }
+
         if (this.isPlayerEnemyCollision(bodyA, bodyB)) {
             const enemy = this.getEnemyFromCollision(bodyA, bodyB);
-            if (enemy?.damage) {
+            if (enemy?.active && !enemy.isDying && enemy.damage) {
                 this.player.takeDamage(enemy.damage);
                 if (this.player.currentHealth <= 0 && !this.state.isGameOver) {
                     this.handlePlayerDeath();
                 }
             }
         }
-
-        if (this.isSpellEnemyCollision(bodyA, bodyB)) {
-            const { spell, enemy } = this.getSpellAndEnemyFromCollision(bodyA, bodyB);
-            if (spell && enemy && enemy.active) {
-                spell.handleCollision(enemy);
-            }
-        }
     }
-
     setupEventListeners() {
         this.events.off('playerDied').off('enemyDied').off('playerHealthChanged');
 
         this.events.on('playerDied', this.handlePlayerDeath, this);
-        this.events.on('enemyDied', () => {
+        this.events.on('enemyDied', (enemy) => {
             this.state.totalEnemiesKilled++;
             this.state.currentWaveEnemiesKilled++;
+            if (this.player) {
+                this.player.gainXP(enemy.xpValue || 10);
+            }
             this.updateUI();
         });
 
@@ -329,10 +356,23 @@ export default class MainScene extends Phaser.Scene {
     }
 
     getSpellAndEnemyFromCollision(bodyA, bodyB) {
+        let spell = null;
+        let enemy = null;
+
         if (bodyA.label === 'spellCollider' && bodyB.label === 'EnemyCollider') {
-            return { spell: bodyA.gameObject, enemy: bodyB.gameObject };
+            spell = bodyA.gameObject;
+            enemy = bodyB.gameObject;
+        } else {
+            spell = bodyB.gameObject;
+            enemy = bodyA.gameObject;
         }
-        return { spell: bodyB.gameObject, enemy: bodyA.gameObject };
+
+        if (!spell || !enemy) {
+
+            return { spell: null, enemy: null };
+        }
+
+        return { spell, enemy };
     }
 
     shutdown() {

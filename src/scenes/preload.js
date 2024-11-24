@@ -91,6 +91,8 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.tilemapTiledJSON('tiles', '/assets/tiles.tmj');
         this.load.audio('bgMusic', ['/assets/audio/Goblins_Dance_(Battle).ogg', '/assets/audio/Goblins_Dance_(Battle).mp3']);
         this.load.audio('playerDeathAudio', ['/assets/audio/sfx/Female painscream sound Effects.ogg', '/assets/audio/sfx/Female painscream sound Effects.mp3']);
+        this.load.audio('playerLevelUp', ['/assets/audio/sfx/levelup.mp3', '/assets/audio/sfx/levelup.ogg']);
         this.load.audioSprite('playersfx', '/assets/audio/sfx/spriteAudioGamma.json', ['/assets/audio/sfx/spriteAudioGamma.mp3', '/assets/audio/sfx/spriteAudioGamma.ogg']);
+
     }
 }

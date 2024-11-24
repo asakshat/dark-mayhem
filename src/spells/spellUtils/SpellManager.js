@@ -25,7 +25,7 @@ export default class SpellManager {
     }
 
     getSpellCooldown(type) {
-        return SpellConfig[type]?.base?.cooldown || 1000;
+        return SpellConfig[type]?.base?.cooldown || 500;
     }
 
     cast(type, x, y, target) {

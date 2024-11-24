@@ -8,6 +8,10 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         this.setupAudio();
         this.setupPhysics();
         this.setupMouseInput();
+        this.normalTint = 0xffffff;
+        this.damageTint = 0xff0000;
+        this.isTinting = false;
+        this.tintDuration = 100;
     }
 
     setupPlayerStats() {
@@ -38,23 +42,40 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
             'playerhurt005'
         ];
         this.hurtAudioSprite = this.scene.sound.addAudioSprite('playersfx');
-    }
+        this.levelUpSound = this.scene.sound.add('playerLevelUp', {
+            loop: false,
+            volume: 0.6
+        });
 
+    }
     setupPhysics() {
         const { Body, Bodies } = Phaser.Physics.Matter.Matter;
         const playerCollider = Bodies.circle(this.x, this.y, 14, {
             isSensor: false,
             label: 'playerCollider'
         });
-        const playerSensor = Bodies.circle(this.x, this.y, 50, {
-            isSensor: true,
-            label: 'playerSensor'
-        });
+
+        const CATEGORIES = {
+            PLAYER: 0x0001,
+            SPELL: 0x0002,
+            ENEMY: 0x0004,
+            WALL: 0x0008
+        };
+
+        playerCollider.gameObject = this;
+
         const compoundBody = Body.create({
-            parts: [playerCollider, playerSensor],
-            frictionAir: 0.05,
+            parts: [playerCollider],
+            frictionAir: 0.05
         });
-        this.setExistingBody(compoundBody).setFixedRotation();
+
+        // Update collidesWith to include ENEMY and WALL
+        this.setExistingBody(compoundBody)
+            .setFixedRotation()
+            .setBounce(0.2)
+            .setMass(1)
+            .setCollisionCategory(CATEGORIES.PLAYER)
+            .setCollidesWith(CATEGORIES.ENEMY | CATEGORIES.WALL);
     }
 
     playRandomHurtSound() {
@@ -64,17 +85,15 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
 
     takeDamage(amount) {
         if (this.isDead) return;
+        this.flashDamage();
 
         const currentTime = this.scene.time.now;
         if (currentTime - this.lastHurtTime >= this.hurtCooldown) {
-            // Store damage info
             this._pendingDamage = amount;
             this._damageTime = currentTime;
 
-            // Play sound and wait for completion
             this.playRandomHurtSound();
 
-            // Apply immediate health update for UI
             const newHealth = Math.max(0, this.currentHealth - amount);
             this.currentHealth = newHealth;
             this.scene.events.emit('playerHealthChanged', this.currentHealth, this.maxHealth);
@@ -96,6 +115,21 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
             }
         }
     }
+    flashDamage() {
+        if (!this.isTinting) {
+            this.isTinting = true;
+
+            // Apply damage tint
+            this.setTint(this.damageTint);
+
+            // Reset tint after duration
+            this.scene.time.delayedCall(this.tintDuration, () => {
+                this.clearTint();
+                this.isTinting = false;
+            });
+        }
+    }
+
 
     die() {
         if (this.isDead) return;
@@ -114,12 +148,44 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
     getXPToNextLevel() {
         return this.level * 100;
     }
-
     levelUp() {
         this.level++;
         this.maxHealth += 10;
         this.currentHealth = this.maxHealth;
-        // Could add level up sound here
+
+        // Add level up effect
+        this.playLevelUpEffect();
+    }
+    playLevelUpEffect() {
+        const wasAlreadyTinting = this.isTinting;
+        this.isTinting = true;
+
+        // Clear any existing tint
+        this.clearTint();
+
+        // Apply blue tint
+        this.setTint(0x00ffff);  // Bright cyan/blue color
+
+        // Play level up sound
+        this.levelUpSound.play();
+
+        // Listen for the sound completion to clear the tint
+        this.levelUpSound.once('complete', () => {
+            this.clearTint();
+            if (!wasAlreadyTinting) {
+                this.isTinting = false;
+            }
+        });
+
+        // Backup timer in case audio doesn't trigger complete event
+        this.scene.time.delayedCall(2000, () => {
+            if (this.isTinting) {
+                this.clearTint();
+                if (!wasAlreadyTinting) {
+                    this.isTinting = false;
+                }
+            }
+        });
     }
 
     gainXP(amount) {

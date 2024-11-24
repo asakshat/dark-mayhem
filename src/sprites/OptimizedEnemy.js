@@ -1,6 +1,6 @@
 import { EnemyTypes } from "./enemyTypes";
-export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
 
+export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
     constructor(data) {
         const { scene, x, y, type = 'ORC' } = data;
         const enemyConfig = EnemyTypes[type];
@@ -8,6 +8,7 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
 
         super(scene.matter.world, x, y, enemyConfig.spritesheetKey, initialFrame);
 
+        // Core properties
         this.scene.add.existing(this);
         this.enemyType = type.toLowerCase();
         this.speed = enemyConfig.speed;
@@ -16,26 +17,47 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         this.damage = enemyConfig.damage;
         this.xpValue = enemyConfig.xpValue;
 
-        // AI properties
+        // Combat properties
+        this.damageTint = 0xff0000;
+        this.tintDuration = 100;
+        this.isTinting = false;
+        this.hitCooldown = 100;
+        this.lastHitTime = 0;
+
+        // State flags
+        this.active = true;
+        this.isDying = false;
+        this.isDestroyed = false;
+
+        // AI Movement Properties
         this.updateInterval = 100;
         this.lastUpdate = 0;
         this.lastGridKey = null;
-        this.preferredDistance = Phaser.Math.Between(100, 200);
-        this.orbitSpeed = 0.5 + Math.random() * 0.5;
+        this.preferredDistance = Phaser.Math.Between(50, 100);
+        this.minDistance = 30;
+        this.orbitSpeed = 0.3 + Math.random() * 0.3;
         this.currentAngle = Math.random() * Math.PI * 2;
-        this.personalSpace = 40;
+        this.personalSpace = 30;
         this.lastPositionChange = 0;
         this.positionChangeInterval = 2000 + Math.random() * 2000;
 
         this.setupPhysics(enemyConfig.colliderRadius);
         this.setupAnimations();
     }
+
     setupPhysics(radius) {
         const { Body, Bodies } = Phaser.Physics.Matter.Matter;
         const enemyCollider = Bodies.circle(this.x, this.y, radius, {
             isSensor: false,
             label: 'EnemyCollider'
         });
+
+        const CATEGORIES = {
+            PLAYER: 0x0001,
+            SPELL: 0x0002,
+            ENEMY: 0x0004,
+            WALL: 0x0008
+        };
 
         enemyCollider.gameObject = this;
 
@@ -47,8 +69,11 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
         this.setExistingBody(compoundBody)
             .setFixedRotation()
             .setBounce(0.2)
-            .setMass(1);
+            .setMass(1)
+            .setCollisionCategory(CATEGORIES.ENEMY)
+            .setCollidesWith(CATEGORIES.PLAYER | CATEGORIES.SPELL | CATEGORIES.WALL);
     }
+
     setupAnimations() {
         if (!this.anims.isPlaying) {
             this.play(`${this.enemyType}_run`);
@@ -56,9 +81,8 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
     }
 
     update(time, spatialGrid) {
-        if (!this.scene?.player || !this.active) return;
+        if (!this.scene?.player || !this.active || this.isDying || this.isDestroyed) return;
 
-        // Update spatial grid position
         if (spatialGrid) {
             const newGridKey = spatialGrid.getCellKey(this.x, this.y);
             if (this.lastGridKey !== newGridKey) {
@@ -67,134 +91,239 @@ export default class OptimizedEnemy extends Phaser.Physics.Matter.Sprite {
             }
         }
 
-        // Check if within camera view
         const camera = this.scene.cameras.main;
-        const inView = Phaser.Geom.Rectangle.Overlaps(
-            camera.worldView,
-            this.getBounds()
-        );
+        this.setVisible(Phaser.Geom.Rectangle.Overlaps(camera.worldView, this.getBounds()));
 
-        this.setVisible(inView);
-
-        // Only update AI at intervals
         if (time - this.lastUpdate >= this.updateInterval) {
             this.updateAI();
             this.lastUpdate = time;
         }
     }
 
-
     updateAI() {
         if (!this.scene?.player) return;
 
         const time = this.scene.time.now;
         const playerPos = { x: this.scene.player.x, y: this.scene.player.y };
+        const distanceToPlayer = Phaser.Math.Distance.Between(this.x, this.y, playerPos.x, playerPos.y);
+        const behavior = this.determineCurrentBehavior(distanceToPlayer);
 
-        // Calculate base position relative to player
-        let targetPos = this.calculateTargetPosition(playerPos, time);
+        let targetPos = this.getTargetPosition(behavior, playerPos, time);
+        targetPos = this.adjustForNearbyEnemies(targetPos, distanceToPlayer);
 
-        // Adjust for other enemies
-        targetPos = this.adjustForNearbyEnemies(targetPos);
-
-        // Calculate movement
-        this.moveTowardsPosition(targetPos);
+        this.moveToPosition(targetPos, distanceToPlayer, behavior);
     }
 
-    calculateTargetPosition(playerPos, time) {
-        // Update orbit angle based on time
-        if (time - this.lastPositionChange > this.positionChangeInterval) {
-            this.currentAngle += (Math.random() - 0.5) * Math.PI / 2;
-            this.lastPositionChange = time;
+
+    determineCurrentBehavior(distanceToPlayer) {
+        if (this.enemyType.includes('rouge')) {
+            // Rogues should strike and retreat
+            if (distanceToPlayer < this.minDistance * 0.5) return 'aggressive';
+            if (distanceToPlayer < this.preferredDistance) return 'flank';
+            return 'aggressive';
         }
 
-        this.currentAngle += this.orbitSpeed * 0.016; // Smooth orbital motion
+        if (this.enemyType.includes('warrior')) {
+            // Warriors should always be aggressive when close
+            return 'aggressive';
+        }
 
-        // Calculate target position in orbit around player
-        return {
-            x: playerPos.x + Math.cos(this.currentAngle) * this.preferredDistance,
-            y: playerPos.y + Math.sin(this.currentAngle) * this.preferredDistance
-        };
+        if (this.enemyType.includes('shaman') || this.enemyType.includes('mage')) {
+            // Ranged enemies keep distance
+            if (distanceToPlayer < this.preferredDistance * 0.6) return 'retreat';
+            if (distanceToPlayer < this.preferredDistance) return 'orbit';
+            return 'flank';
+        }
+
+        // Default behavior - more aggressive
+        if (distanceToPlayer < this.preferredDistance) {
+            return 'aggressive';
+        }
+        return 'orbit';
     }
 
-    adjustForNearbyEnemies(targetPos) {
-        let adjustedX = targetPos.x;
-        let adjustedY = targetPos.y;
+    getTargetPosition(behavior, playerPos, time) {
+        switch (behavior) {
+            case 'aggressive':
+                // Direct path to player with minimal randomization
+                return {
+                    x: playerPos.x + (Math.random() - 0.5) * 10,
+                    y: playerPos.y + (Math.random() - 0.5) * 10
+                };
 
-        // Get nearby enemies from spatial grid
-        if (this.scene.waveManager?.spatialGrid) {
-            const nearbyEntities = this.scene.waveManager.spatialGrid
-                .getNearbyEntities(this.x, this.y, this.personalSpace * 2);
+            case 'flank': {
+                const flankAngle = this.currentAngle + Math.PI / 2;
+                const flankDistance = this.preferredDistance * 0.5; // Reduced distance
+                return {
+                    x: playerPos.x + Math.cos(flankAngle) * flankDistance,
+                    y: playerPos.y + Math.sin(flankAngle) * flankDistance
+                };
+            }
 
-            nearbyEntities.forEach(entity => {
-                if (entity !== this && entity.active) {
-                    const dx = this.x - entity.x;
-                    const dy = this.y - entity.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < this.personalSpace) {
-                        const pushForce = (this.personalSpace - distance) / this.personalSpace;
-                        adjustedX += (dx / distance) * pushForce * 20;
-                        adjustedY += (dy / distance) * pushForce * 20;
-                    }
+            case 'orbit': {
+                if (time - this.lastPositionChange > this.positionChangeInterval) {
+                    this.currentAngle += (Math.random() - 0.5) * Math.PI / 4;
+                    this.orbitSpeed = 0.3 + Math.random() * 0.3;
+                    this.lastPositionChange = time;
                 }
-            });
+                this.currentAngle += this.orbitSpeed * 0.005;
+                const orbitDistance = this.preferredDistance * 0.8;
+                return {
+                    x: playerPos.x + Math.cos(this.currentAngle) * orbitDistance,
+                    y: playerPos.y + Math.sin(this.currentAngle) * orbitDistance
+                };
+            }
+
+            case 'retreat': {
+                const angle = Phaser.Math.Angle.Between(playerPos.x, playerPos.y, this.x, this.y);
+                const retreatDistance = this.preferredDistance * 1.2;
+                return {
+                    x: playerPos.x + Math.cos(angle) * retreatDistance,
+                    y: playerPos.y + Math.sin(angle) * retreatDistance
+                };
+            }
+        }
+    }
+    adjustForNearbyEnemies(targetPos, distanceToPlayer) {
+        if (!this.scene.waveManager?.spatialGrid) return targetPos;
+
+        const nearbyEntities = this.scene.waveManager.spatialGrid
+            .getNearbyEntities(this.x, this.y, this.personalSpace * 2);
+
+        let totalAdjustment = { x: 0, y: 0 };
+        let adjustmentCount = 0;
+
+        nearbyEntities.forEach(entity => {
+            if (entity !== this && entity.active) {
+                const dx = this.x - entity.x;
+                const dy = this.y - entity.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < this.personalSpace) {
+                    const pushForce = (this.personalSpace - distance) / this.personalSpace;
+                    const adjustmentStrength = Math.min(1, distanceToPlayer / (this.preferredDistance * 0.5));
+                    totalAdjustment.x += (dx / distance) * pushForce * 8 * adjustmentStrength;
+                    totalAdjustment.y += (dy / distance) * pushForce * 8 * adjustmentStrength;
+                    adjustmentCount++;
+                }
+            }
+        });
+
+        if (adjustmentCount > 0) {
+            return {
+                x: targetPos.x + totalAdjustment.x / adjustmentCount,
+                y: targetPos.y + totalAdjustment.y / adjustmentCount
+            };
         }
 
-        return { x: adjustedX, y: adjustedY };
+        return targetPos;
     }
-    moveTowardsPosition(targetPos) {
+
+    moveToPosition(targetPos, distanceToPlayer, behavior) {
         const dx = targetPos.x - this.x;
         const dy = targetPos.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance > 5) {
-            const speed = this.speed * (distance > this.preferredDistance ? 1.5 : 1);
-            let velocityX = (dx / distance) * speed;
-            let velocityY = (dy / distance) * speed;
-
-            // Add slight randomization to movement
-            velocityX += (Math.random() - 0.5) * 0.3;
-            velocityY += (Math.random() - 0.5) * 0.3;
-
-            this.setVelocity(velocityX, velocityY);
-            this.setFlipX(velocityX < 0);
-
-            if (this.visible && (!this.anims.isPlaying || this.anims.currentAnim?.key !== `${this.enemyType}_run`)) {
-                this.play(`${this.enemyType}_run`, true);
-            }
-        } else {
+        if (distance <= 5) {
             this.setVelocity(0, 0);
+            return;
+        }
+
+        let speedMultiplier = {
+            'aggressive': 1.6,  // Increased aggressive speed
+            'retreat': 1.4,
+            'flank': 1.3,
+            'orbit': 1.0
+        }[behavior] || 1;
+
+        // Extra speed boost when very close to player during aggressive behavior
+        if (behavior === 'aggressive' && distanceToPlayer < this.minDistance) {
+            speedMultiplier *= 1.3;
+        }
+
+        const baseSpeed = this.speed * speedMultiplier;
+        let velocityX = (dx / distance) * baseSpeed;
+        let velocityY = (dy / distance) * baseSpeed;
+
+        // Reduce randomization for aggressive behavior
+        if (behavior !== 'aggressive') {
+            velocityX += (Math.random() - 0.5) * 0.1 * baseSpeed;
+            velocityY += (Math.random() - 0.5) * 0.1 * baseSpeed;
+        }
+
+        this.setVelocity(velocityX, velocityY);
+        this.setFlipX(velocityX < 0);
+
+        if (this.visible && (!this.anims.isPlaying || this.anims.currentAnim?.key !== `${this.enemyType}_run`)) {
+            this.play(`${this.enemyType}_run`, true);
         }
     }
 
     takeDamage(amount) {
+        if (!this.active || this.isDying || this.currentHealth <= 0) return;
+        if (this.scene.time.now - this.lastHitTime < this.hitCooldown) return;
+
         this.currentHealth -= amount;
+        this.lastHitTime = this.scene.time.now;
+        this.flashDamage();
+
         if (this.currentHealth <= 0) {
-            this.die();
+            this.initiateDeathSequence();
         }
     }
 
-    die() {
+    flashDamage() {
+        if (!this.active || this.isDying) return;
+
+        this.setTint(this.damageTint);
+        this.scene.time.delayedCall(this.tintDuration, () => {
+            if (this.active) {
+                this.clearTint();
+            }
+        });
+    }
+
+    initiateDeathSequence() {
+        if (this.isDying) return;
+
+        this.isDying = true;
+        this.active = false;
+        this.setVelocity(0, 0);
+        this.setStatic(true);
+
         const deathAnim = `${this.enemyType}_death`;
         if (this.scene.anims.exists(deathAnim)) {
             this.play(deathAnim);
-            this.once('animationcomplete', () => {
-                this.scene.events.emit('enemyDied', this);
-                if (this.scene.waveManager?.enemyPool) {
-                    this.scene.waveManager.enemyPool.despawn(this);
-                } else {
-                    this.destroy();
+            this.once('animationcomplete', () => this.completeDeathSequence());
+            this.scene.time.delayedCall(1000, () => {
+                if (this.isDying && !this.isDestroyed) {
+                    this.completeDeathSequence();
                 }
             });
         } else {
-            this.scene.events.emit('enemyDied', this);
-            if (this.scene.waveManager?.enemyPool) {
-                this.scene.waveManager.enemyPool.despawn(this);
-            } else {
-                this.destroy();
-            }
+            this.completeDeathSequence();
+        }
+    }
+
+    completeDeathSequence() {
+        if (!this.scene || this.isDestroyed) return;
+
+        this.scene.events.emit('enemyDied', this);
+
+        if (this.lastGridKey && this.scene.waveManager?.spatialGrid) {
+            this.scene.waveManager.spatialGrid.remove(this, this.lastGridKey);
+        }
+
+        if (this.scene.waveManager?.enemyPool) {
+            this.setActive(false);
+            this.setVisible(false);
+            this.setPosition(-1000, -1000);
+            this.removeAllListeners();
+            this.isDying = false;
+            this.isDestroyed = true;
+            this.scene.waveManager.enemyPool.despawn(this);
+        } else {
+            this.destroy();
         }
     }
 }
-
-

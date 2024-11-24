@@ -3,10 +3,11 @@ export const SpellConfig = {
         id: 'ArcaneBolt',
         base: {
             speed: 3,
-            damage: 20,
+            damage: 100,
             colliderRadius: 8,
+            startingProjectiles: 2,
             maxProjectiles: 10,
-            cooldown: 1000,
+            cooldown: 500,
         },
         visuals: {
             texture: 'playerChar',

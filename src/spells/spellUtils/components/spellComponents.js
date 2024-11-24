@@ -4,10 +4,28 @@ export class SpellComponents {
         return {
             update: (time) => {
                 if (spell.target?.active && !spell.isExploding) {
-                    const angle = Phaser.Math.Angle.Between(
-                        spell.x, spell.y,
-                        spell.target.x, spell.target.y
-                    );
+                    let angle;
+
+                    if (spell.fireAngle !== undefined) {
+                        // Use initial fire angle plus slight tracking
+                        const targetAngle = Phaser.Math.Angle.Between(
+                            spell.x, spell.y,
+                            spell.target.x, spell.target.y
+                        );
+
+                        // Blend between fire angle and target angle
+                        angle = Phaser.Math.Angle.RotateTo(
+                            spell.fireAngle,
+                            targetAngle,
+                            0.1 // Adjust this value to control how much projectiles curve
+                        );
+                    } else {
+                        // Direct tracking if no fire angle set
+                        angle = Phaser.Math.Angle.Between(
+                            spell.x, spell.y,
+                            spell.target.x, spell.target.y
+                        );
+                    }
 
                     spell.setVelocity(
                         Math.cos(angle) * spell.speed,
