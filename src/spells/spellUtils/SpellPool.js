@@ -5,6 +5,7 @@ export default class SpellPool {
         this.spellId = spellId;
         this.config = config;
         this.pool = [];
+        this.activeSpells = new Set();
         this.initializePool();
     }
 
@@ -34,18 +35,27 @@ export default class SpellPool {
     }
 
     getSpell() {
-        return this.pool.find(spell => !spell.active) || null;
+        const spell = this.pool.find(spell => !spell.active);
+        if (spell) {
+            this.activeSpells.add(spell);
+        }
+        return spell;
     }
 
     updateActiveSpells(time) {
-        this.pool.forEach(spell => {
-            if (spell.active) {
+        // Only update active spells
+        this.activeSpells.forEach(spell => {
+            if (!spell.active) {
+                this.activeSpells.delete(spell);
+            } else {
                 spell.update(time);
             }
         });
     }
 
+
     destroy() {
+        this.activeSpells.clear();
         this.pool.forEach(spell => {
             if (spell.destroy) {
                 spell.destroy();

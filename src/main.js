@@ -4,13 +4,9 @@ import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin';
 import MenuScene from './scenes/menuScene';
 import MainScene from './scenes/mainScene';
 import PreloadScene from './scenes/preload';
-import ReactOverlay from './ReactOverlay';
 import GameOverScene from './scenes/GameoverScene';
+import LevelUpScene from './scenes/LevelupScene';
 
-const gameContainer = document.createElement('div');
-gameContainer.id = 'game-container';
-gameContainer.style.position = 'relative';
-document.body.appendChild(gameContainer);
 
 const sizes = {
   width: 1200,
@@ -27,10 +23,8 @@ const config = {
   roundPixels: true,
   width: sizes.width,
   height: sizes.height,
-  parent: 'game-container',
   canvas: gameCanvas,
-  scene: [PreloadScene, MenuScene, MainScene, GameOverScene],
-  scale: {
+  scene: [PreloadScene, MenuScene, MainScene, LevelUpScene, GameOverScene], scale: {
     zoom: 1,
   },
   physics: {
@@ -52,6 +46,5 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-const overlay = new ReactOverlay();
 
-export { game, overlay };
+export { game };

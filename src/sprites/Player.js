@@ -146,7 +146,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
     }
 
     getXPToNextLevel() {
-        return this.level * 100;
+        return this.level * 150;
     }
 
     levelUp() {

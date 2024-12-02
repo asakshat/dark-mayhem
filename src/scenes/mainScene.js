@@ -1,8 +1,9 @@
 import Player from "../sprites/Player";
 import WaveManager from "../WaveManager";
-import UIManager from "../UImanager";
 import SpellManager from "../spells/spellUtils/SpellManager";
 import { AutoAttackSystem } from "../spells/spellUtils/system/AutoAttackSystem";
+import { MeteorSystem } from "../Hazards/Meteor";
+import { SpellProgress } from "../spells/spellUtils/SpellManager";
 
 
 export default class MainScene extends Phaser.Scene {
@@ -40,7 +41,6 @@ export default class MainScene extends Phaser.Scene {
         };
 
         this.systems = {};
-        this.uiManager = new UIManager();
         this.player = null;
         this.waveManager = null;
         this.mapDimensions = null;
@@ -48,7 +48,151 @@ export default class MainScene extends Phaser.Scene {
             bgMusic: null,
             deathSound: null
         };
+
+        this.ui = {
+            healthBar: null,
+            xpBar: null,
+            killCounter: null,
+            levelText: null
+        };
     }
+
+    createUI() {
+        // (Create) a UI container that stays fixed to the camera
+        const uiContainer = this.add.container(120, 50);
+        uiContainer.setScrollFactor(0);
+
+        // Health Bar
+        const healthBarWidth = 200;
+        const healthBarHeight = 20;
+        const healthBarX = 20;
+        const healthBarY = 20;
+
+        // Health bar background
+        this.ui.healthBarBg = this.add.rectangle(
+            healthBarX,
+            healthBarY,
+            healthBarWidth,
+            healthBarHeight,
+            0x000000,
+            0.7
+        ).setOrigin(0);
+
+        // Health bar fill
+        this.ui.healthBar = this.add.rectangle(
+            healthBarX,
+            healthBarY,
+            healthBarWidth,
+            healthBarHeight,
+            0xff0000,
+            1
+        ).setOrigin(0);
+
+        // XP Bar
+        const xpBarWidth = 300;
+        const xpBarHeight = 10;
+        const xpBarX = 20;
+        const xpBarY = 50;
+
+        // XP bar background
+        this.ui.xpBarBg = this.add.rectangle(
+            xpBarX,
+            xpBarY,
+            xpBarWidth,
+            xpBarHeight,
+            0x000000,
+            0.7
+        ).setOrigin(0);
+
+        // XP bar fill
+        this.ui.xpBar = this.add.rectangle(
+            xpBarX,
+            xpBarY,
+            xpBarWidth,
+            xpBarHeight,
+            0x3168D3,
+
+        ).setOrigin(0);
+
+        // Level Text
+        this.ui.levelText = this.add.text(
+            20,
+            70,
+            'Level: 1',
+            {
+                fontSize: '24px',
+                fontFamily: 'CustomPixelFont',
+                color: '#ffffff'
+            }
+        );
+
+        // Kill Counter
+        this.ui.killCounter = this.add.text(
+            this.scale.width - 20,
+            20,
+            'Kills: 0',
+            {
+                fontSize: '24px',
+                fontFamily: 'CustomPixelFont',
+                color: '#ffffff'
+            }
+        ).setOrigin(1, 0);
+
+        // Add all UI elements to the container
+        uiContainer.add([
+            this.ui.healthBarBg,
+            this.ui.healthBar,
+            this.ui.xpBarBg,
+            this.ui.xpBar,
+            this.ui.levelText,
+            this.ui.killCounter
+        ]);
+
+        // Set UI depth to ensure it's always on top
+        uiContainer.setDepth(1000);
+    }
+    updateUI() {
+        if (!this.player || !this.ui.healthBar) return;
+
+        // Update health bar
+        const healthBarWidth = 200;
+        const healthPercent = this.player.currentHealth / this.player.maxHealth;
+        this.ui.healthBar.width = healthBarWidth * healthPercent;
+        this.ui.healthText?.destroy();
+        this.ui.healthText = this.add.text(
+            230, // Position after health bar
+            20,  // Same Y as health bar
+            `${Math.ceil(this.player.currentHealth)}/${this.player.maxHealth}`,
+            {
+                fontSize: '16px',
+                fontFamily: 'CustomPixelFont',
+                color: '#ffffff'
+            }
+        ).setScrollFactor(0).setDepth(1000);
+
+        // Update XP bar
+        const xpBarWidth = 300;
+        const xpProgress = this.player.xp / this.player.getXPToNextLevel();
+        this.ui.xpBar.width = xpBarWidth * xpProgress;
+        this.ui.xpText?.destroy();
+        this.ui.xpText = this.add.text(
+            330, // Position after XP bar
+            50,  // Same Y as XP bar
+            `${Math.floor(this.player.xp)}/${this.player.getXPToNextLevel()}`,
+            {
+                fontSize: '16px',
+                fontFamily: 'CustomPixelFont',
+                color: '#ffffff'
+            }
+        ).setScrollFactor(0).setDepth(1000);
+
+        // Update level text
+        this.ui.levelText.setText(`Level: ${this.player.level}`);
+
+        // Update kill counter
+        this.ui.killCounter.setText(`Kills: ${this.state.totalEnemiesKilled}`);
+    }
+
 
 
     create() {
@@ -60,9 +204,11 @@ export default class MainScene extends Phaser.Scene {
         this.setupCollisions();
         this.setupEventListeners();
         this.setupPlayerInput();
+        this.createUI();
         this.updateUI();
-
-
+        this.spellProgress = new SpellProgress();
+        this.spellProgress.scene = this;
+        this.spellProgress.addNewSpell('ArcaneBolt');
 
     }
 
@@ -74,7 +220,9 @@ export default class MainScene extends Phaser.Scene {
             autoAttack: new AutoAttackSystem(this, {
                 range: 400,
                 spellType: 'ArcaneBolt'
-            })
+            }),
+            meteor: new MeteorSystem(this)
+
         };
     }
 
@@ -200,6 +348,7 @@ export default class MainScene extends Phaser.Scene {
             }
         }
     }
+
     setupEventListeners() {
         this.events.off('playerDied').off('enemyDied').off('playerHealthChanged').off('playerLeveledUp');
 
@@ -214,8 +363,56 @@ export default class MainScene extends Phaser.Scene {
         });
 
         this.events.on('playerHealthChanged', () => this.updateUI());
-        this.events.on('playerLeveledUp', () => this.updateUI());
+        this.events.on('playerLeveledUp', () => {
+            this.updateUI();
+            this.scene.launch('LevelUpScene', {
+                mainScene: this,
+                player: this.player,
+                spellProgress: this.spellProgress
+            });
+        });
     }
+
+    pauseGameSystems() {
+        this.state.isPaused = true;
+
+        // Stop enemy movement but don't destroy them
+        if (this.waveManager) {
+            this.waveManager.enabled = false;
+        }
+
+        // Pause player input but keep rendering
+        if (this.player) {
+            this.player.inputEnabled = false;
+        }
+
+        // Pause auto-attack
+        this.state.autoAttackEnabled = false;
+
+        // Pause meteor system
+        if (this.systems.meteor) {
+            this.systems.meteor.enabled = false;
+        }
+    }
+    resumeGameSystems() {
+        this.state.isPaused = false;
+
+        if (this.waveManager) {
+            this.waveManager.enabled = true;
+        }
+
+        if (this.player) {
+            this.player.inputEnabled = true;
+        }
+
+        this.state.autoAttackEnabled = true;
+
+        // Resume meteor system
+        if (this.systems.meteor) {
+            this.systems.meteor.enabled = true;
+        }
+    }
+
     setupPlayerInput() {
         this.player.inputKeys = this.input.keyboard.addKeys({
             up: 'W',
@@ -312,8 +509,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     update(time) {
-        if (this.state.isGameOver) return;
-
+        if (this.state.isGameOver || this.state.isPaused) return;
         this.player?.update();
         this.waveManager?.update();
         this.updateCamera();
@@ -333,13 +529,6 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.setZoom(1.3);
     }
 
-    updateUI() {
-        this.uiManager.updateUI({
-            currentScene: 'MainScene',
-            player: this.player,
-            totalEnemiesKilled: this.state.totalEnemiesKilled
-        });
-    }
 
     isSpellEnemyCollision(bodyA, bodyB) {
         return (bodyA.label === 'spellCollider' && bodyB.label === 'EnemyCollider') ||
@@ -393,11 +582,6 @@ export default class MainScene extends Phaser.Scene {
             }
         });
 
-        // Cleanup UI
-        if (this.uiManager?.destroy) {
-            this.uiManager.destroy();
-        }
-
         // Remove event listeners
         this.events.off('playerDied');
         this.events.off('enemyDied');
@@ -423,9 +607,17 @@ export default class MainScene extends Phaser.Scene {
             this.player.destroy();
         }
 
+        // Cleanup UI elements
+        Object.values(this.ui).forEach(element => {
+            if (element?.destroy) {
+                element.destroy();
+            }
+        });
+
         // Null out references
         this.player = null;
         this.waveManager = null;
         this.systems = {};
+        this.ui = {};
     }
 }

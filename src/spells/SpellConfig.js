@@ -1,11 +1,13 @@
 export const SpellConfig = {
     ArcaneBolt: {
         id: 'ArcaneBolt',
+        name: 'Arcane Bolt',
+        icon: '🔮',
         base: {
             speed: 3,
             damage: 100,
             colliderRadius: 8,
-            startingProjectiles: 2,
+            startingProjectiles: 1,
             maxProjectiles: 10,
             cooldown: 1000,
         },
@@ -32,4 +34,6 @@ export const SpellConfig = {
             retargetDelay: 300
         }
     }
+
+
 };

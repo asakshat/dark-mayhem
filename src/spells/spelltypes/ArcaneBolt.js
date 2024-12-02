@@ -1,7 +1,7 @@
+// In ArcaneBolt.js
 import { SpellConfig } from '../SpellConfig';
-import BaseSpell from './BaseSpell';
-
-export default class ArcaneBolt extends BaseSpell {
+import ProjectileSpells from './ProjectileSpells';
+export default class ArcaneBolt extends ProjectileSpells {
     constructor(data) {
         super({
             ...data,
