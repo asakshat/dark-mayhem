@@ -107,6 +107,18 @@ export default class BaseSpell extends Phaser.Physics.Matter.Sprite {
         this.removeAllListeners('animationcomplete');
     }
 
+    updateConfig(newConfig) {
+        if (newConfig.damage !== undefined) {
+            this.damage = newConfig.damage;
+        }
+        if (newConfig.cooldown !== undefined) {
+            this.cooldown = newConfig.cooldown;
+        }
+        if (newConfig.speed !== undefined) {
+            this.speed = newConfig.speed;
+        }
+    }
+
     update(time) {
         if (!this.active || this.isExploding) return;
 

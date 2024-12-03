@@ -125,80 +125,43 @@ export class SpellProgress {
                         level: 4,
                         damage: SpellConfig.ArcaneBolt.base.damage + 60,
                         projectiles: SpellConfig.ArcaneBolt.base.startingProjectiles + 3,
-                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 300
+                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 200
                     },
                     {
                         level: 5,
                         damage: SpellConfig.ArcaneBolt.base.damage + 80,
                         projectiles: SpellConfig.ArcaneBolt.base.startingProjectiles + 3,
-                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 400
+                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 200
                     },
                     {
                         level: 6,
                         damage: SpellConfig.ArcaneBolt.base.damage + 80,
                         projectiles: SpellConfig.ArcaneBolt.base.startingProjectiles + 3,
-                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 400
+                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 200
                     },
                     {
                         level: 7,
                         damage: SpellConfig.ArcaneBolt.base.damage + 80,
                         projectiles: SpellConfig.ArcaneBolt.base.startingProjectiles + 3,
-                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 400
+                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 200
                     },
                     {
                         level: 8,
                         damage: SpellConfig.ArcaneBolt.base.damage + 80,
                         projectiles: SpellConfig.ArcaneBolt.base.startingProjectiles + 3,
-                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 400
+                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 200
                     },
                     {
                         level: 9,
                         damage: SpellConfig.ArcaneBolt.base.damage + 80,
                         projectiles: SpellConfig.ArcaneBolt.base.startingProjectiles + 3,
-                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 400
+                        cooldown: SpellConfig.ArcaneBolt.base.cooldown - 200
                     }
                 ]
             },
-            // {
-            //     id: 'FireBolt',
-            //     name: SpellConfig.FireBolt.name,
-            //     icon: SpellConfig.FireBolt.icon,
-            //     baseStats: {
-            //         damage: SpellConfig.FireBolt.base.damage,
-            //         projectiles: SpellConfig.FireBolt.base.startingProjectiles,
-            //         cooldown: SpellConfig.FireBolt.base.cooldown
-            //     },
-            //     upgrades: [
-            //         {
-            //             level: 2,
-            //             damage: SpellConfig.FireBolt.base.damage + 15,
-            //             projectiles: SpellConfig.FireBolt.base.startingProjectiles + 1,
-            //             cooldown: SpellConfig.FireBolt.base.cooldown - 100
-            //         },
-            //         {
-            //             level: 3,
-            //             damage: SpellConfig.FireBolt.base.damage + 30,
-            //             projectiles: SpellConfig.FireBolt.base.startingProjectiles + 2,
-            //             cooldown: SpellConfig.FireBolt.base.cooldown - 200
-            //         },
-            //         {
-            //             level: 4,
-            //             damage: SpellConfig.FireBolt.base.damage + 45,
-            //             projectiles: SpellConfig.FireBolt.base.startingProjectiles + 3,
-            //             cooldown: SpellConfig.FireBolt.base.cooldown - 300
-            //         },
-            //         {
-            //             level: 5,
-            //             damage: SpellConfig.FireBolt.base.damage + 60,
-            //             projectiles: SpellConfig.FireBolt.base.startingProjectiles + 4,
-            //             cooldown: SpellConfig.FireBolt.base.cooldown - 400
-            //         }
-            //     ]
-            // }
-
-
 
         ];
+        this.MAX_PROJECTILES = 8;
     }
 
 
@@ -233,23 +196,72 @@ export class SpellProgress {
         const currentLevel = this.ownedSpells.get(spellId) || 0;
         this.ownedSpells.set(spellId, currentLevel + 1);
 
-        // Update SpellConfig with new stats
+        // Get new stats with projectile capping
         const newStats = this.getCurrentStats(spellId);
-        if (newStats) {
-            // Update only the specific spell's config
-            SpellConfig[spellId].base.damage = newStats.damage;
-            SpellConfig[spellId].base.startingProjectiles = newStats.projectiles;
-            SpellConfig[spellId].base.cooldown = newStats.cooldown;
+        if (!newStats) return;
 
-            // Reinitialize only the specific spell's pool
-            if (this.scene?.systems?.spell) {
-                const pool = this.scene.systems.spell.pools.get(spellId);
-                if (pool) {
-                    pool.destroy();
-                    this.scene.systems.spell.pools.set(
-                        spellId,
-                        new SpellPool(this.scene, spellId, SpellConfig[spellId])
-                    );
+        // Cap projectiles for performance
+        const cappedProjectiles = Math.min(newStats.projectiles, this.MAX_PROJECTILES);
+
+        // Update the spell configuration
+        SpellConfig[spellId].base.damage = newStats.damage;
+        SpellConfig[spellId].base.startingProjectiles = cappedProjectiles;
+        SpellConfig[spellId].base.cooldown = newStats.cooldown;
+
+        // Update existing pool
+        if (this.scene?.systems?.spell) {
+            const pool = this.scene.systems.spell.pools.get(spellId);
+            if (!pool) return;
+
+            // Update pool configuration first
+            pool.config = {
+                ...pool.config,
+                base: {
+                    ...pool.config.base,
+                    damage: newStats.damage,
+                    startingProjectiles: cappedProjectiles,
+                    cooldown: newStats.cooldown,
+                    maxProjectiles: this.MAX_PROJECTILES
+                }
+            };
+
+            // Efficiently update or trim existing pool
+            const targetPoolSize = Math.min(this.MAX_PROJECTILES, pool.pool.length);
+
+            // Update existing spells
+            pool.pool.slice(0, targetPoolSize).forEach(spell => {
+                if (spell) {
+                    spell.updateConfig({
+                        damage: newStats.damage,
+                        cooldown: newStats.cooldown,
+                        totalProjectiles: cappedProjectiles
+                    });
+                }
+            });
+
+            // Remove excess projectiles if needed
+            if (pool.pool.length > targetPoolSize) {
+                const removed = pool.pool.splice(targetPoolSize);
+                removed.forEach(spell => {
+                    if (spell.destroy) {
+                        spell.destroy();
+                    }
+                });
+            }
+
+            // Add new projectiles only if necessary
+            const currentSize = pool.pool.length;
+            if (currentSize < cappedProjectiles) {
+                const spellClass = pool.getSpellClass(spellId);
+                for (let i = currentSize; i < cappedProjectiles; i++) {
+                    const spell = new spellClass({
+                        scene: this.scene,
+                        x: -1000,
+                        y: -1000,
+                        config: pool.config
+                    });
+                    spell.deactivate();
+                    pool.pool.push(spell);
                 }
             }
         }
@@ -259,22 +271,36 @@ export class SpellProgress {
         if (!this.ownedSpells.has(spellId)) {
             this.ownedSpells.set(spellId, 1);
 
-            // Set initial stats from level 1
+            // Get initial stats
             const initialStats = this.getCurrentStats(spellId);
+
+            // Update SpellConfig
             SpellConfig[spellId].base.damage = initialStats.damage;
             SpellConfig[spellId].base.startingProjectiles = initialStats.projectiles;
             SpellConfig[spellId].base.cooldown = initialStats.cooldown;
 
-            // Initialize only the new spell's pool
-            if (this.scene?.systems?.spell) {
-                this.scene.systems.spell.pools.set(
-                    spellId,
-                    new SpellPool(this.scene, spellId, SpellConfig[spellId])
-                );
+            // Create new pool
+            if (this.scene?.systems?.spell && !this.scene.systems.spell.pools.has(spellId)) {
+                const pool = new SpellPool(this.scene, spellId, SpellConfig[spellId]);
+                this.scene.systems.spell.pools.set(spellId, pool);
+
+                // Initialize pool with correct number of projectiles
+                const maxProjectiles = Math.max(initialStats.projectiles, SpellConfig[spellId].base.maxProjectiles || 10);
+                const spellClass = pool.getSpellClass(spellId);
+
+                for (let i = 0; i < maxProjectiles; i++) {
+                    const spell = new spellClass({
+                        scene: this.scene,
+                        x: -1000,
+                        y: -1000,
+                        config: SpellConfig[spellId]
+                    });
+                    spell.deactivate();
+                    pool.pool.push(spell);
+                }
             }
         }
     }
-
     getRandomNewSpell() {
         const unownedSpells = this.availableSpells.filter(
             spell => !this.ownedSpells.has(spell.id)

@@ -8,4 +8,7 @@ export default class ArcaneBolt extends ProjectileSpells {
             config: SpellConfig.ArcaneBolt
         });
     }
+
+
+
 }

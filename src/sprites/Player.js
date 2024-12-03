@@ -33,6 +33,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
 
     setupAudio() {
 
+        const sfxVolume = parseFloat(localStorage.getItem('sfxVolume')) || 0.6;
         this.hurtSounds = [
             'playerhurt000',
             'playerhurt001',
@@ -44,7 +45,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         this.hurtAudioSprite = this.scene.sound.addAudioSprite('playersfx');
         this.levelUpSound = this.scene.sound.add('playerLevelUp', {
             loop: false,
-            volume: 0.6
+            volume: sfxVolume
         });
 
     }

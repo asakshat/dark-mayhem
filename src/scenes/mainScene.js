@@ -227,14 +227,17 @@ export default class MainScene extends Phaser.Scene {
     }
 
     setupAudio() {
+        const musicVolume = parseFloat(localStorage.getItem('musicVolume')) || 0.8;
+        const sfxVolume = parseFloat(localStorage.getItem('sfxVolume')) || 0.6;
+
         this.audio.bgMusic = this.sound.add('bgMusic', {
             loop: true,
-            volume: 0.8
+            volume: musicVolume
         });
 
         this.audio.deathSound = this.sound.add('playerDeathAudio', {
             loop: false,
-            volume: 0.6
+            volume: sfxVolume
         });
 
         this.audio.bgMusic.play();

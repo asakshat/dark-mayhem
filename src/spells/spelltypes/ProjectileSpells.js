@@ -7,25 +7,31 @@ export default class ProjectileSpells extends BaseSpell {
         this.totalProjectiles = this.config.base.startingProjectiles;
     }
 
+    // In ProjectileSpells class
     findTargets() {
         if (!this.scene.waveManager?.spatialGrid) return [];
 
         const searchRadius = this.config.behavior.searchRadius;
+        // Get limited number of nearby entities
         const nearbyEntities = Array.from(
             this.scene.waveManager.spatialGrid.getNearbyEntities(
                 this.scene.player.x,
                 this.scene.player.y,
                 searchRadius
             )
-        );
+        ).slice(0, this.totalProjectiles * 2); // Only get 2x needed targets for efficiency
+
+        // Pre-calculate player position for distance checks
+        const playerX = this.scene.player.x;
+        const playerY = this.scene.player.y;
 
         return nearbyEntities
             .filter(enemy => enemy.active && !enemy.isDying && enemy.currentHealth > 0)
             .map(enemy => ({
                 enemy,
                 distance: Phaser.Math.Distance.Between(
-                    this.scene.player.x,
-                    this.scene.player.y,
+                    playerX,
+                    playerY,
                     enemy.x,
                     enemy.y
                 )
@@ -72,6 +78,15 @@ export default class ProjectileSpells extends BaseSpell {
         return true;
     }
 
+    updateConfig(newConfig) {
+        // Call parent's updateConfig
+        BaseSpell.prototype.updateConfig.call(this, newConfig);
+
+        // Handle ProjectileSpells specific updates
+        if (newConfig.totalProjectiles !== undefined) {
+            this.totalProjectiles = newConfig.totalProjectiles;
+        }
+    }
     update(time) {
         if (!this.active || this.isExploding) return;
 

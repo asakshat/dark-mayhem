@@ -6,6 +6,7 @@ import MainScene from './scenes/mainScene';
 import PreloadScene from './scenes/preload';
 import GameOverScene from './scenes/GameoverScene';
 import LevelUpScene from './scenes/LevelupScene';
+import OptionsScene from './scenes/Options';
 
 
 const sizes = {
@@ -24,7 +25,7 @@ const config = {
   width: sizes.width,
   height: sizes.height,
   canvas: gameCanvas,
-  scene: [PreloadScene, MenuScene, MainScene, LevelUpScene, GameOverScene], scale: {
+  scene: [PreloadScene, MenuScene, MainScene, LevelUpScene, GameOverScene, OptionsScene], scale: {
     zoom: 1,
   },
   physics: {

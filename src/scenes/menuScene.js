@@ -49,6 +49,9 @@ export default class MenuScene extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5);
     }
+    showOptions() {
+        this.scene.start('OptionsScene');
+    }
 
     createButtons() {
         const buttonStyle = {

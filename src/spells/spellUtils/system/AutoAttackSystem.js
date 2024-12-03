@@ -23,38 +23,30 @@ export class AutoAttackSystem {
         }
     }
 
+    // In AutoAttackSystem class
     findNearestEnemies() {
-        const targets = [];
-        const maxTargets = this.getMaxTargets();
-
-        // Get all enemy types from the pool
+        const maxTargets = Math.min(this.getMaxTargets(), 8); // Cap targets for performance
         const allEnemies = [];
-        this.scene.waveManager.enemyPool.pool.forEach((enemies) => {
-            // Filter active enemies
-            const activeEnemies = enemies.filter(enemy =>
-                enemy.active && !enemy.isDying && enemy.currentHealth > 0
-            );
-            allEnemies.push(...activeEnemies);
-        });
 
-        // Sort all enemies by distance
-        const sortedEnemies = allEnemies
-            .map(enemy => ({
-                enemy,
-                distance: Phaser.Math.Distance.Between(
+        // Only process active enemies
+        this.scene.waveManager.enemyPool.pool.forEach((enemies) => {
+            const activeEnemies = enemies.filter(enemy =>
+                enemy.active &&
+                !enemy.isDying &&
+                enemy.currentHealth > 0 &&
+                Phaser.Math.Distance.Between(
                     this.scene.player.x,
                     this.scene.player.y,
                     enemy.x,
                     enemy.y
-                )
-            }))
-            .filter(item => item.distance <= this.config.range)
-            .sort((a, b) => a.distance - b.distance);
+                ) <= this.config.range
+            ).slice(0, maxTargets); // Limit early for performance
 
-        // Take only the nearest enemies up to maxTargets
-        return sortedEnemies
-            .slice(0, maxTargets)
-            .map(item => item.enemy);
+            allEnemies.push(...activeEnemies);
+            if (allEnemies.length >= maxTargets) return; // Early exit if we have enough targets
+        });
+
+        return allEnemies.slice(0, maxTargets);
     }
 
     getMaxTargets() {
